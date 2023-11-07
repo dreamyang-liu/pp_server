@@ -4,6 +4,7 @@ pub mod worker_pool {
         fn add_worker(&mut self, num: usize) -> Result<usize, Error>;
         fn acquire_worker(&mut self) -> Result<u16, Error>;
         fn print_status(&self);
+        fn get_status(&self) -> String;
     }
     pub struct Worker {
         workload: usize,
@@ -23,7 +24,11 @@ pub mod worker_pool {
             if previouse_worker_number >= self.worker_pool_capacity {
                 return Result::Err(Error::new("worker pool is full!"));
             }
-            let num_of_workers_to_add = self.worker_pool_capacity - previouse_worker_number;
+            println!("Current worker pool size: {}", previouse_worker_number);
+            let mut num_of_workers_to_add = self.worker_pool_capacity - previouse_worker_number;
+            if num < num_of_workers_to_add {
+                num_of_workers_to_add = num;
+            }
             if previouse_worker_number + num > self.worker_pool_capacity {
                 print!("worker pool is full, only {} workers can be added!", num_of_workers_to_add);
             }
@@ -65,6 +70,21 @@ pub mod worker_pool {
             for worker in self.workers_list.iter() {
                 println!("worker port: {}, workload: {}", worker.port, worker.workload);
             }
+        }
+
+        fn get_status(&self) -> String {
+            let mut status = String::new();
+            status.push_str(format!("<p>worker pool capacity: {}\n<\
+            p>", self.worker_pool_capacity).as_str());
+            status.push_str(format!("<p>worker pool size: {}\n<\
+            p>", self.workers_list.len()).as_str());
+            status.push_str(format!("<p>worker pool workload limit: {}\n<\
+            p>", self.workload_limit).as_str());
+            for worker in self.workers_list.iter() {
+                status.push_str(format!("<p>worker port: {}, workload: {}\n<\
+                p>", worker.port, worker.workload).as_str());
+            }
+            return status;
         }
     }
 
